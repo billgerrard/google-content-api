@@ -217,21 +217,21 @@ sub load_google_config {
 __END__
 =head1 NAME
 
-  Google::ContentAPI - Interact with Google's Content API for Shopping
+Google::ContentAPI - Interact with Google's Content API for Shopping
 
 =head1 DESCRIPTION
 
-  Add, modify and delete items from the Google Merchant Center platform via
-  the Content API for Shopping.
+Add, modify and delete items from the Google Merchant Center platform via
+the Content API for Shopping.
 
-  Authentication is done via Service Account credentials. See the following for details:
-  https://developers.google.com/shopping-content/v2/how-tos/service-accounts
+Authentication is done via Service Account credentials. See the following for details:
+L<https://developers.google.com/shopping-content/v2/how-tos/service-accounts>
 
-  You will also need to create a Merchant Center Account:
-  https://developers.google.com/shopping-content/v2/quickstart
+You will also need to create a Merchant Center Account:
+L<https://developers.google.com/shopping-content/v2/quickstart>
 
-  For convenince, add your Merchant account ID to the *.json file provided by Google.
-  Your complete *.json file, after adding your merchant ID, will look something like this:
+For convenince, add your Merchant account ID to the *.json file provided by Google.
+Your complete *.json file, after adding your merchant ID, will look something like this:
 
   {
     "merchant_id": "123456789",
@@ -488,86 +488,86 @@ __END__
 
 =head2 new()
 
-  Create a new Google::ContentAPI object
+Create a new Google::ContentAPI object
 
 =head3 debug
 
-  Displays API debug information
+Displays API debug information
 
 =head3 config_file
 
-  Path and filename of external .json config file.
-  Either config_file or config_json must be provided. If both config_file
-  and config_json are provided, config_file will be used.
+Path and filename of external C<.json> config file.
+Either config_file or config_json must be provided. If both config_file
+and config_json are provided, config_file will be used.
 
 =head3 config_json
 
-  Text containing contents of the json config. Useful if you want to
-  store the json config in another resource such as a database.
-  Either config_file or config_json must be provided. If both config_file
-  and config_json are provided, config_file will be used.
+Text containing contents of the json config. Useful if you want to
+store the json config in another resource such as a database.
+Either C<config_file> or C<config_json> must be provided. If both C<config_file>
+and C<config_json> are provided, C<config_file> will be used.
 
 =head3 merchant_id
 
-  optional if merchant_id is specificed in json config
+optional if merchant_id is specificed in json config
 
 =head2 ACCOUNTS
 
 =head3 authinfo
 
-  Returns information about the authenticated user.
+Returns information about the authenticated user.
 
 =head2 ACCOUNTSTATUSES
 
 =head3 list
 
-  Lists the the status of accounts in a Multi-Client account.
-  This will fail with response code 403 if the account is not a multi-client account.
+Lists the the status of accounts in a Multi-Client account.
+This will fail with response code C<403> if the account is not a multi-client account.
 
 =head3 get
 
-  Retrieves the status of your Merchant Center account.
+Retrieves the status of your Merchant Center account.
 
 =head2 PRODUCTS
 
 =head3 custombatch
 
-  Retrieves, inserts, and deletes multiple products in a single request.
+Retrieves, inserts, and deletes multiple products in a single request.
 
 =head3 insert
 
-  Uploads a product to your Merchant Center account. If an item with the
-  same channel, contentLanguage, offerId, and targetCountry already exists,
-  this method updates that entry.
+Uploads a product to your Merchant Center account. If an item with the
+same channel, contentLanguage, offerId, and targetCountry already exists,
+this method updates that entry.
 
 =head3 list
 
-  Lists the products in your Merchant Center account.
+Lists the products in your Merchant Center account.
 
 =head3 get
 
-  Retrieves a product from your Merchant Center account.
+Retrieves a product from your Merchant Center account.
 
 =head3 delete
 
-  Deletes a product from your Merchant Center account.
+Deletes a product from your Merchant Center account.
 
 =head2 PRODUCTSTATUSES
 
 =head3 list
 
-  Lists the the status and issues of products in your Merchant Center Account.
+Lists the the status and issues of products in your Merchant Center Account.
 
 =head3 get
 
-  Retrieves the status and issues of a specific product.
+Retrieves the status and issues of a specific product.
 
 =head1 UNIMPLEMENTED FEATURES
 
-  Certain API methods are not yet implemented (no current personal business need).
+Certain API methods are not yet implemented (no current personal business need).
 
-  A "custom" resource is available to perform methods that are not implemented by
-  this module.
+A "custom" resource is available to perform methods that are not implemented by
+this module.
 
   # get an order from the merchant account
   $result = $google->get(
@@ -590,7 +590,7 @@ __END__
 =head1 COPYRIGHT AND LICENSE
 
   Copyright (C) 2018 Bill Gerrard
-
+  
   This library is free software; you can redistribute it and/or modify
   it under the same terms as Perl itself, either Perl version 5.20.2 or,
   at your option, any later version of Perl 5 you may have available.
