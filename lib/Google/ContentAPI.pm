@@ -15,12 +15,14 @@
 #
 # VERSION HISTORY
 #
+# + v1.03       12/10/2020 Allow custom endpoint, update docs for v2.1 API
+# + v1.02       04/11/2018 Add accountstatuses, productstatuses methods. Add "custom" resource
 # + v1.01       03/27/2018 Added config_json, merchant_id options and switched to Crypt::JWT
 # + v1.00       03/23/2018 initial release
 #
 # COPYRIGHT AND LICENSE
 #
-# Copyright (C) 2018 Bill Gerrard
+# Copyright (C) 2018,2020 Bill Gerrard
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself, either Perl version 5.20.2 or,
@@ -48,7 +50,7 @@ use Crypt::JWT qw(encode_jwt);
 use REST::Client;
 use HTML::Entities;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 sub new {
     my ($class, $params) = @_;
@@ -64,6 +66,10 @@ sub new {
     $self->{merchant_id} = $self->{config}->{merchant_id}
         || $params->{merchant_id}
         || croak "'merchant_id' not provided in json config in new()";
+
+    $self->{endpoint} = $self->{config}->{endpoint}
+        || $params->{endpoint}
+        || 'https://www.googleapis.com/content/v2';
 
     $self->{debug} = 1 if $params->{debug};
     $self->{google_auth_token} = get_google_auth_token($self);
@@ -129,7 +135,7 @@ sub prepare_method {
 sub init_rest_client {
     my $self = shift;
     my $r = REST::Client->new();
-    $r->setHost('https://www.googleapis.com/content/v2');
+    $r->setHost($self->{endpoint});
     $r->addHeader('Authorization', $self->{google_auth_token});
     $r->addHeader('Content-type', 'application/json');
     $r->addHeader('charset', 'UTF-8');
@@ -230,10 +236,11 @@ L<https://developers.google.com/shopping-content/v2/how-tos/service-accounts>
 You will also need to create a Merchant Center Account:
 L<https://developers.google.com/shopping-content/v2/quickstart>
 
-For convenince, add your Merchant account ID to the *.json file provided by Google.
+For convenience, add your Merchant account ID to the *.json file provided by Google.
 Your complete *.json file, after adding your merchant ID, will look something like this:
 
   {
+    "endpoint": "https://www.googleapis.com/content/v2.1",
     "merchant_id": "123456789",
     "type": "service_account",
     "project_id": "content-api-194321",
@@ -255,6 +262,7 @@ Your complete *.json file, after adding your merchant ID, will look something li
   use Data::Dumper;
 
   my $google = Google::ContentAPI->new({
+      endpoint => 'https://www.googleapis.com/content/v2.1',
       debug => 0,
       config_file => 'content-api-key.json',
       config_json => $json_text,
@@ -295,7 +303,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
   $result = $google->get(
       resource => 'products',
       method   => 'list',
-      params   => ['includeInvalidInsertedItems' => 'true']
   );
   print "$result->{code} ". ($result->{code} eq '200' ? 'success' : 'failure') ."\n";
   print "Products list: \n". Dumper $result;
@@ -305,7 +312,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
   $result = $google->post(
       resource => 'products',
       method   => 'insert',
-      params   => ['dryRun' => 'true'],
       body => {
         contentLanguage => 'en',
         targetCountry => 'US',
@@ -335,7 +341,7 @@ Your complete *.json file, after adding your merchant ID, will look something li
         gtin => '333333-67890',
         mpn => '333333',
         googleProductCategory => 'Home & Garden > Household Supplies > Apples',
-        productType => 'Home & Garden > Household Supplies > Apples',
+        productTypes => 'Home & Garden > Household Supplies > Apples',
         customLabel1 => 'apples'
       }
   );
@@ -359,7 +365,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
       resource => 'products',
       method   => 'delete',
       id => 'online:en:US:'. $del_product_id,
-      #params   => ['dryRun' => 'true']
   );
   print "$result->{code} ". ($result->{code} eq '204' ? 'success' : 'failure') ."\n"; # 204 = delete success
 
@@ -403,7 +408,7 @@ Your complete *.json file, after adding your merchant ID, will look something li
               gtin => "${i}-67890",
               mpn => "$i",
               googleProductCategory => 'Home & Garden > Household Supplies > Apples',
-              productType => 'Home & Garden > Household Supplies > Apples',
+              productTypes => 'Home & Garden > Household Supplies > Apples',
               customLabel1 => 'apples'
           }
       };
@@ -412,7 +417,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
   $result = $google->post(
       resource => 'products',
       method   => 'batch',
-      #params   => ['dryRun' => 'true'],
       body => { entries => $products }
   );
   print "$result->{code} ". ($result->{code} eq '200' ? 'success' : 'failure') ."\n";
@@ -433,7 +437,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
   $result = $google->post(
       resource => 'products',
       method   => 'batch',
-      #params   => ['dryRun' => 'true'],
       body => { entries => $products }
   );
   print "$result->{code} ". ($result->{code} eq '200' ? 'success' : 'failure') ."\n";
@@ -455,7 +458,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
   $result = $google->post(
       resource => 'products',
       method   => 'batch',
-      #params   => ['dryRun' => 'true'],
       body => { entries => $products }
   );
   print "$result->{code} ". ($result->{code} eq '200' ? 'success' : 'failure') ."\n";
@@ -466,7 +468,6 @@ Your complete *.json file, after adding your merchant ID, will look something li
       resource => 'productstatuses',
       method   => 'list',
       params   => [
-          'includeInvalidInsertedItems' => 'true',
           'maxResults' => 10
       ]
   );
@@ -490,6 +491,13 @@ Your complete *.json file, after adding your merchant ID, will look something li
 
 Create a new Google::ContentAPI object
 
+=head3 endpoint
+
+API endpoint to use.
+v2.1 endpoint is 'https://www.googleapis.com/content/v2.1'.
+v2.0 endpoint is 'https://www.googleapis.com/content/v2'.
+If not provided, default to v2.0 endpoint for backwards compatibility.
+
 =head3 debug
 
 Displays API debug information
@@ -509,7 +517,7 @@ and C<config_json> are provided, C<config_file> will be used.
 
 =head3 merchant_id
 
-optional if merchant_id is specificed in json config
+optional if merchant_id is specified in json config
 
 =head2 ACCOUNTS
 
@@ -584,23 +592,23 @@ this module.
 
 =head1 AUTHOR
 
-  Original Author
-  Bill Gerrard <bill@gerrard.org>
+Original Author
+Bill Gerrard <bill@gerrard.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-  Copyright (C) 2018 Bill Gerrard
+Copyright (C) 2018,2020 Bill Gerrard
   
-  This library is free software; you can redistribute it and/or modify
-  it under the same terms as Perl itself, either Perl version 5.20.2 or,
-  at your option, any later version of Perl 5 you may have available.
-  Disclaimer of warranty: This program is provided by the copyright holder
-  and contributors "As is" and without any express or implied warranties.
-  The implied warranties of merchantability, fitness for a particular purpose,
-  or non-infringement are disclaimed to the extent permitted by your local
-  law. Unless required by law, no copyright holder or contributor will be
-  liable for any direct, indirect, incidental, or consequential damages
-  arising in any way out of the use of the package, even if advised of the
-  possibility of such damage.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.20.2 or,
+at your option, any later version of Perl 5 you may have available.
+Disclaimer of warranty: This program is provided by the copyright holder
+and contributors "As is" and without any express or implied warranties.
+The implied warranties of merchantability, fitness for a particular purpose,
+or non-infringement are disclaimed to the extent permitted by your local
+law. Unless required by law, no copyright holder or contributor will be
+liable for any direct, indirect, incidental, or consequential damages
+arising in any way out of the use of the package, even if advised of the
+possibility of such damage.
 
 =cut
